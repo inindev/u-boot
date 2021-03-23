@@ -1,0 +1,12 @@
+if TARGET_RTH9580WF01
+
+config SYS_BOARD
+	default "rth9580wf01"
+
+config SYS_VENDOR
+	default "resideo"
+
+config SYS_CONFIG_NAME
+	default "rth9580wf01"
+
+endif

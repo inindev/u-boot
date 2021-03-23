@@ -1,0 +1,6 @@
+RTH9580WF01 BOARD
+M:	John Clark <inindev@gmail.com>
+S:	Maintained
+F:	board/resideo/rth9580wf01/
+F:	include/configs/rth9580wf01.h
+F:	configs/rth9580wf01_spiflash_defconfig

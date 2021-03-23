@@ -495,6 +495,7 @@ static int atmel_hlcdc_probe(struct udevice *dev)
 	uc_priv->xsize = priv->timing.hactive.typ;
 	uc_priv->ysize = priv->timing.vactive.typ;
 	uc_priv->bpix = priv->vl_bpix;
+	uc_priv->rot = dev_read_u32_default(dev, "rotate", 0);
 
 	/* Enable flushing if we enabled dcache */
 	video_set_flush_dcache(dev, true);
