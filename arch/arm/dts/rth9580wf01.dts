@@ -1,0 +1,154 @@
+/*
+ * rth9580wf01.dts - Device Tree file for RTH9580WF01 Thermostat Board
+ *
+ * Licensed under GPLv2 or later.
+ */
+/dts-v1/;
+#include "rth9580wf01.dtsi"
+#include "at91sam9x5_lcd.dtsi"
+#include "at91sam9x5_macb0.dtsi"
+
+/ {
+	model = "Resideo RTH9580WF01 Thermostat Board";
+	compatible = "resideo,rth9580wf01", "atmel,at91sam9x5", "atmel,at91sam9g35", "atmel,at91sam9";
+
+	chosen {
+		bootargs = "console=ttyS0,115200 console=tty0 rootfstype=squashfs,jffs2 noinitrd fbcon=rotate:2";
+		stdout-path = "serial0:115200n8";
+		u-boot,dm-pre-reloc;
+	};
+
+	ahb {
+		apb {
+			spi0: spi@f0000000 {
+				cs-gpios = <&pioA 14 0>, <0>, <0>, <0>;
+				status = "okay";
+				u-boot,dm-pre-reloc;
+
+				spi_flash@0 {
+					#address-cells = <1>;
+					#size-cells = <1>;
+					compatible = "jedec,spi-nor";
+					reg = <0>;
+					spi-max-frequency = <50000000>;
+					m25p,fast-read;
+
+					partition@0 {
+						label = "spl";
+						reg = <0x0 0x8000>;
+					};
+					partition@8000 {
+						label = "uenv1";
+						reg = <0x8000 0x4000>;
+					};
+					partition@c000 {
+						label = "uenv2";
+						reg = <0xc000 0x4000>;
+					};
+					partition@10000 {
+						label = "uboot";
+						reg = <0x10000 0xb0000>;
+					};
+					partition@c0000 {
+						label = "kernel";
+						reg = <0xc0000 0x400000>;
+					};
+					partition@4c0000 {
+						label = "rootfs";
+						reg = <0x4c0000 0x400000>;
+					};
+					partition@8c0000 {
+						label = "data";
+						reg = <0x8c0000 0x740000>;
+					};
+				};
+			};
+
+			ssc0: ssc@f0010000 {
+				status = "okay";
+			};
+
+			i2c0: i2c@f8010000 {
+				status = "okay";
+			};
+
+			usart0: serial@f801c000 {
+				status = "okay";
+			};
+
+			hlcdc: hlcdc@f8038000 {
+				atmel,vl-bpix = <4>;
+				atmel,guard-time = <1>;
+				pinctrl-names = "default";
+				pinctrl-0 = <&pinctrl_lcd_base &pinctrl_lcd_pwm &pinctrl_lcd_rgb888>;
+				rotate = <2>;
+
+				status = "okay";
+				u-boot,dm-pre-reloc;
+
+				display-timings {
+					480x272 {
+						clock-frequency = <9000000>;
+						hactive = <480>;
+						vactive = <272>;
+						hsync-len = <41>;
+						hfront-porch = <2>;
+						hback-porch = <2>;
+						vfront-porch = <2>;
+						vback-porch = <2>;
+						vsync-len = <11>;
+					};
+				};
+			};
+
+			adc0: adc@f804c000 {
+				atmel,adc-ts-wires = <4>;
+				atmel,adc-ts-pressure-threshold = <10000>;
+				status = "okay";
+			};
+
+			dbgu: serial@fffff200 {
+				u-boot,dm-pre-reloc;
+				status = "okay";
+			};
+
+			watchdog: watchdog@fffffe40 {
+				status = "okay";
+			};
+
+			rtc@fffffeb0 {
+				status = "okay";
+			};
+		};
+	};
+
+	memory {
+		reg = <0x20000000 0x1000000>;
+	};
+
+	clocks {
+		slow_xtal {
+			clock-frequency = <32768>;
+		};
+
+		main_xtal {
+			clock-frequency = <12000000>;
+		};
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		pb18 {
+			label = "pb18";
+			gpios = <&pioB 18 GPIO_ACTIVE_LOW>;
+			linux,default-trigger = "heartbeat";
+		};
+
+		pd21 {
+			label = "pd21";
+			gpios = <&pioD 21 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+};
