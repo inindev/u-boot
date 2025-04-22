@@ -14,6 +14,13 @@
 		compatible = "rockchip,rk3576-dmc";
 		bootph-all;
 	};
+
+	soc {
+		rng: rng@2a410000 {
+			compatible = "rockchip,rkrng";
+			reg = <0x0 0x2a410000 0x0 0x200>;
+		};
+	};
 };
 
 &cru {
