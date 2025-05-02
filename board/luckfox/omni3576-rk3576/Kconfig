@@ -1,0 +1,12 @@
+if TARGET_OMNI3576_RK3576
+
+config SYS_BOARD
+	default "omni3576-rk3576"
+
+config SYS_VENDOR
+	default "luckfox"
+
+config SYS_CONFIG_NAME
+	default "omni3576-rk3576"
+
+endif

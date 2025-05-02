@@ -1,5 +1,13 @@
 if ROCKCHIP_RK3576
 
+config TARGET_OMNI3576_RK3576
+	bool "Luckfox Omni3576 Carrier Board with Core3576 Module"
+	help
+	  Enable support for the Luckfox Omni3576 carrier board, paired with the
+	  Core3576 compute module. The Core3576 features the Rockchip RK3576 SoC,
+	  with a quad-core Arm Cortex-A72 at 2.2GHz, quad-core Arm Cortex-A53 at
+	  2.0GHz, an Arm Mali-G52 MC3 GPU, and a 6 TOPS NPU.
+
 config TARGET_ROC_PC_RK3576
 	bool "Firefly ROC-RK3576-PC"
 	help
@@ -15,6 +23,7 @@ config ROCKCHIP_STIMER_BASE
 config SYS_SOC
 	default "rk3576"
 
+source board/luckfox/omni3576-rk3576/Kconfig
 source board/firefly/roc-pc-rk3576/Kconfig
 
 config SYS_CONFIG_NAME

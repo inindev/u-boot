@@ -1,0 +1,8 @@
+NANOPCT6-RK3588
+M:	John Clark <inindev@gmail.com>
+R:	Jonas Karlman <jonas@kwiboo.se>
+S:	Maintained
+F:	board/luckfox/omni3576-rk3576
+F:	include/configs/omni3576-rk3588.h
+F:	configs/omni3576-rk3576_defconfig
+F:	arch/arm/dts/rk3576-luckfox-omni3576*
