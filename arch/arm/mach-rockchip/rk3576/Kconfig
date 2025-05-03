@@ -1,5 +1,13 @@
 if ROCKCHIP_RK3576
 
+config TARGET_ARMSOM_SIGE5
+	bool "ArmSoM Sige5 with Rockchip RK3576"
+	help
+	  Enable support for the ArmSoM Sige5, powered by the 8nm Rockchip RK3576
+	  SoC with a quad-core Cortex-A72 @ 2.2GHz, quad-core Cortex-A53 @ 1.8GHz,
+	  Mali-G52 MC3 GPU, and 6 TOPS NPU. Supports up to 16GB LPDDR4X, dual
+	  Gigabit Ethernet, WiFi 6, Bluetooth 5.0, and 4K HDMI/MIPI DSI outputs.
+
 config TARGET_OMNI3576_RK3576
 	bool "Luckfox Omni3576 Carrier Board with Core3576 Module"
 	help

@@ -1,0 +1,7 @@
+SIGE5-RK3576
+M:	John Clark <inindev@gmail.com>
+R:	Jonas Karlman <jonas@kwiboo.se>
+F:	board/armsom/sige5-rk3576
+F:	include/configs/sige5-rk3576.h
+F:	configs/sige5-rk3576_defconfig
+F:	arch/arm/dts/rk3576-armsom-sige5*

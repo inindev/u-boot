@@ -1,0 +1,12 @@
+if TARGET_SIGE5_RK3576
+
+config SYS_BOARD
+	default "sige5-rk3576"
+
+config SYS_VENDOR
+	default "armsom"
+
+config SYS_CONFIG_NAME
+	default "sige5-rk3576"
+
+endif
