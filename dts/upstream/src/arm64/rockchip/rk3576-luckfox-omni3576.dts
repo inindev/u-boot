@@ -205,8 +205,8 @@
 
 &gmac0 {
 	clock_in_out = "output";
-	phy-mode = "rgmii-rxid";
 	phy-handle = <&rgmii_phy0>;
+	phy-mode = "rgmii-rxid";
 	pinctrl-names = "default";
 	pinctrl-0 = <&eth0m0_miim
 		     &eth0m0_tx_bus2
@@ -236,7 +236,7 @@
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 20000 100000>;
 	tx_delay = <0x20>;
-	status = "disabled";
+	status = "okay";
 };
 
 &gpu {
@@ -245,7 +245,7 @@
 };
 
 &hdmi {
-	status = "disabled";
+	status = "okay";
 };
 
 &hdmi_in {
