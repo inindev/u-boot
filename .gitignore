@@ -65,6 +65,7 @@ fit-dtb.blob*
 #
 # Generated files
 #
+/binman-fake/
 /spl/
 /tpl/
 /defconfig
