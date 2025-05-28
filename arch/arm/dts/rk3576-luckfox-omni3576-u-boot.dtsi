@@ -1,0 +1,17 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2025 John Clark <inindev@gmail.com>
+ */
+
+#include "rk3576-u-boot.dtsi"
+
+/ {
+	aliases {
+		mmc0 = &sdhci;
+		mmc1 = &sdmmc;
+	};
+};
+
+&sdhci {
+	cap-mmc-highspeed;
+};
