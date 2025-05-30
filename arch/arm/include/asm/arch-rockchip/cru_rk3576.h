@@ -67,9 +67,9 @@ struct rk3576_cru {
 	unsigned int clksel_con[181]; /* Address Offset: 0x0300 */
 	unsigned int reserved2[139];/* Address Offset: 0x05d4 */
 	unsigned int clkgate_con[80];/* Address Offset: 0x0800 */
-	unsigned int reserved3[48];/* Address Offset: 0x0938 */
-	unsigned int softrst_con[80];/* Address Offset: 0x0400 */
-	unsigned int reserved4[48];/* Address Offset: 0x0b38 */
+	unsigned int reserved3[48];/* Address Offset: 0x0940 */
+	unsigned int softrst_con[80];/* Address Offset: 0x0a00 */
+	unsigned int reserved4[48];/* Address Offset: 0x0b40 */
 	unsigned int glb_cnt_th;/* Address Offset: 0x0c00 */
 	unsigned int glb_rst_st;/* Address Offset: 0x0c04 */
 	unsigned int glb_srst_fst;/* Address Offset: 0x0c08 */
@@ -78,7 +78,7 @@ struct rk3576_cru {
 	unsigned int reserved5[43];/* Address Offset: 0x0c14 */
 	unsigned int smoth_divfree_con[3];/* Address Offset: 0x0cc0 */
 	unsigned int fracdiv_high_con[4];/* Address Offset: 0x0ccc */
-	unsigned int reserved8[32137];/* Address Offset: 0x0c38 */
+	unsigned int reserved8[32137];/* Address Offset: 0x0cdc */
 	unsigned int pmuclksel_con[22]; /* Address Offset: 0x20300 */
 	unsigned int reserved9[298];/* Address Offset: 0x20358 */
 	unsigned int pmuclkgate_con[8]; /* Address Offset: 0x20800 */
