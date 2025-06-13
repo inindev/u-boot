@@ -4,6 +4,12 @@ S:	Maintained
 F:	arch/arm/dts/rk3576-generic*
 F:	configs/generic-rk3576_defconfig
 
+NANOPI_M5-RK3576
+M:	John Clark <inindev@gmail.com>
+S:	Maintained
+F:	arch/arm/dts/rk3576-nanopi-m5*
+F:	configs/nanopi_m5-rk3576_defconfig
+
 OMNI3576-RK3576
 M:	John Clark <inindev@gmail.com>
 S:	Maintained

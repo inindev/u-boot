@@ -138,6 +138,7 @@ List of mainline supported Rockchip boards:
      - Firefly ROC-RK3576-PC (roc-pc-rk3576)
      - Generic RK3576 (generic-rk3576)
      - Luckfox Omni3576 (omni3576-rk3576)
+     - FriendlyElec NanoPi M5 (nanopi_m5-rk3576)
 
 * rk3588
      - ArmSoM Sige7 (sige7-rk3588)
