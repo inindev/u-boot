@@ -284,6 +284,34 @@ static ulong meson_clk_get_rate(struct clk *clk)
 	return meson_clk_get_rate_by_id(clk, clk->id);
 }
 
+static ulong meson_clk_set_rate_by_id(struct clk *clk, unsigned long id,
+				      ulong rate)
+{
+	switch (id) {
+	case CLKID_SD_EMMC_B_CLK0:
+	case CLKID_SD_EMMC_C_CLK0:
+		/* TOFIX: implement rate set for MMC clocks */
+		return 0;
+	default:
+		return -ENOENT;
+	}
+}
+
+static ulong meson_clk_set_rate(struct clk *clk, ulong rate)
+{
+	ulong current_rate = meson_clk_get_rate_by_id(clk, clk->id);
+	int ret;
+
+	if (IS_ERR_VALUE(current_rate))
+		return current_rate;
+
+	ret = meson_clk_set_rate_by_id(clk, clk->id, rate);
+	if (IS_ERR_VALUE(ret))
+		return ret;
+
+	return 0;
+}
+
 static int meson_clk_probe(struct udevice *dev)
 {
 	struct meson_clk *priv = dev_get_priv(dev);
@@ -308,6 +336,7 @@ static struct clk_ops meson_clk_ops = {
 	.disable	= meson_clk_disable,
 	.enable		= meson_clk_enable,
 	.get_rate	= meson_clk_get_rate,
+	.set_rate	= meson_clk_set_rate,
 };
 
 static const struct udevice_id meson_clk_ids[] = {
