@@ -1,0 +1,11 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+
+/* eMMC and NAND share BOOT_0. Linux failed mmc@7000 until nfc was off. */
+&nfc {
+	status = "disabled";
+};
+
+/* C7 has no SDIO wifi. Same as meson-axg-s400-u-boot.dtsi. */
+&sd_emmc_b {
+	status = "disabled";
+};

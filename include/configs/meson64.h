@@ -116,15 +116,10 @@
 #endif
 
 #ifndef BOOT_TARGET_DEVICES
+/* Hubitat C7: no romusb/usbdfu uclass. eMMC first, USB host if MMC fails. */
 #define BOOT_TARGET_DEVICES(func) \
-	func(ROMUSB, romusb, na)  \
-	func(USB_DFU, usbdfu, na)  \
 	BOOT_TARGET_MMC(func) \
-	BOOT_TARGET_DEVICES_USB(func) \
-	BOOT_TARGET_NVME(func) \
-	BOOT_TARGET_SCSI(func) \
-	BOOT_TARGET_PXE(func) \
-	BOOT_TARGET_DHCP(func)
+	BOOT_TARGET_DEVICES_USB(func)
 #endif
 
 #define BOOTM_SIZE		__stringify(0x1700000)

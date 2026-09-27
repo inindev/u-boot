@@ -1,0 +1,294 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Device tree for the Hubitat Elevation C7 (Amlogic A113X / meson-axg)
+ */
+
+/dts-v1/;
+
+#include "meson-axg.dtsi"
+#include <dt-bindings/gpio/gpio.h>
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/interrupt-controller/irq.h>
+#include <dt-bindings/leds/common.h>
+
+/ {
+	compatible = "hubitat,elevation-c7", "amlogic,a113x", "amlogic,meson-axg";
+	model = "Hubitat Elevation C7";
+
+	aliases {
+		serial0 = &uart_AO;    /* console, ttyAML0 */
+		serial1 = &uart_B;     /* Zigbee, ttyAML1 */
+		serial2 = &uart_AO_B;  /* Z-Wave, ttyAML2 */
+		ethernet0 = &ethmac;
+	};
+
+	chosen {
+		stdout-path = "serial0:115200n8";
+	};
+
+	/* 1 GiB at 0x0 */
+	memory@0 {
+		device_type = "memory";
+		reg = <0x0 0x0 0x0 0x40000000>;
+	};
+
+	reserved-memory {
+		linux,cma {
+			size = <0x0 0x400000>;
+		};
+	};
+
+	/* eMMC reset is BOOT_9 */
+	emmc_pwrseq: emmc-pwrseq {
+		compatible = "mmc-pwrseq-emmc";
+		reset-gpios = <&gpio BOOT_9 GPIO_ACTIVE_LOW>;
+	};
+
+	/* Fixed always-on rails: a model, not a measured enable pin */
+	vcc_5v: regulator-vcc-5v {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC5V";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+	};
+
+	vddao_3v3: regulator-vddao-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VDDAO_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		vin-supply = <&vcc_5v>;
+		regulator-always-on;
+	};
+
+	vcc_3v3: regulator-vcc-3v3 {
+		compatible = "regulator-fixed";
+		regulator-name = "VCC_3V3";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		vin-supply = <&vddao_3v3>;
+		regulator-always-on;
+	};
+
+	vddio_boot: regulator-vddio-boot {
+		compatible = "regulator-fixed";
+		regulator-name = "VDDIO_BOOT";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		vin-supply = <&vddao_3v3>;
+		regulator-always-on;
+	};
+
+	vccq_1v8: regulator-vccq-1v8 {
+		compatible = "regulator-fixed";
+		regulator-name = "VCCQ_1V8";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		vin-supply = <&vddao_3v3>;
+		regulator-always-on;
+	};
+
+	usb_pwr: regulator-usb-pwr {
+		compatible = "regulator-fixed";
+		regulator-name = "USB_PWR";
+		regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		vin-supply = <&vcc_5v>;
+		regulator-always-on;
+	};
+
+	/* SCPI thermal sensor. No cooling-maps: meson-axg.dtsi has
+	 * no cpufreq cooling device to bind. The critical trip still
+	 * powers off.
+	 */
+	thermal-zones {
+		cpu_thermal: cpu-thermal {
+			polling-delay-passive = <250>;
+			polling-delay = <1000>;
+			thermal-sensors = <&scpi_sensors 0>;
+
+			trips {
+				cpu_critical: cpu-critical {
+					temperature = <100000>;
+					hysteresis = <2000>;
+					type = "critical";
+				};
+			};
+		};
+	};
+
+	/* Front RGB, active-high */
+	leds {
+		compatible = "gpio-leds";
+
+		led_red: led-0 {
+			color = <LED_COLOR_ID_RED>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&gpio GPIOZ_5 GPIO_ACTIVE_HIGH>;
+			label = "red";
+		};
+
+		led_green: led-1 {
+			color = <LED_COLOR_ID_GREEN>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&gpio_ao GPIOAO_10 GPIO_ACTIVE_HIGH>;
+			label = "green";
+		};
+
+		led_blue: led-2 {
+			color = <LED_COLOR_ID_BLUE>;
+			function = LED_FUNCTION_STATUS;
+			gpios = <&gpio_ao GPIOAO_3 GPIO_ACTIVE_HIGH>;
+			label = "blue";
+		};
+	};
+
+	/* Bottom button, GPIOAO_11, active-low */
+	/* gpio_intc pad 11; one virq per pad, AXG channel has one polarity bit */
+	keys {
+		compatible = "gpio-keys";
+
+		user {
+			label = "user";
+			linux,code = <BTN_1>;
+			gpios = <&gpio_ao GPIOAO_11 GPIO_ACTIVE_LOW>;
+			interrupt-parent = <&gpio_intc>;
+			interrupts = <11 IRQ_TYPE_EDGE_FALLING>;
+			debounce-interval = <50>;
+		};
+	};
+};
+
+/* ------------------------------------------------------------------
+ * Serial console: 115200 8N1
+ *   2TP1 = 3V3, 2TP2 = RX, 2TP3 = TX, 2TP4 = GND
+ *   pad order: 2TP4, 2TP2, 2TP3, 2TP1
+ * ------------------------------------------------------------------ */
+&uart_AO {
+	status = "okay";
+	pinctrl-0 = <&uart_ao_a_pins>;
+	pinctrl-names = "default";
+};
+
+/* ------------------------------------------------------------------
+ * eMMC: Samsung 8GTF4R, 7.28 GiB, 8-bit HS200
+ * ------------------------------------------------------------------ */
+&sd_emmc_c {
+	status = "okay";
+	pinctrl-0 = <&emmc_pins>, <&emmc_ds_pins>;
+	pinctrl-1 = <&emmc_clk_gate_pins>;
+	pinctrl-names = "default", "clk-gate";
+
+	bus-width = <8>;
+	cap-mmc-highspeed;
+	max-frequency = <200000000>;
+	non-removable;
+	disable-wp;
+	mmc-ddr-1_8v;
+	mmc-hs200-1_8v;
+
+	mmc-pwrseq = <&emmc_pwrseq>;
+
+	vmmc-supply = <&vcc_3v3>;
+	vqmmc-supply = <&vccq_1v8>;
+};
+
+/* meson-axg.dtsi leaves nand-controller@7800 enabled with nand_all_pins,
+ * which includes BOOT_0 (eMMC DAT0). This board has eMMC and no NAND.
+ * Leaving the controller on fails mmc@7000: BOOT_0 already requested.
+ */
+&nfc {
+	status = "disabled";
+};
+
+/* ------------------------------------------------------------------
+ * Ethernet: RMII on bank X, PHY address 0, Realtek RTL8201F
+ * GPIOX_8 is the MAC. GPIOX_22 is MDC; there is no PHY reset GPIO.
+ * ------------------------------------------------------------------ */
+&ethmac {
+	status = "okay";
+	pinctrl-0 = <&eth_rmii_x_pins>;
+	pinctrl-names = "default";
+	phy-handle = <&eth_phy0>;
+	phy-mode = "rmii";
+
+	mdio {
+		compatible = "snps,dwmac-mdio";
+		#address-cells = <1>;
+		#size-cells = <0>;
+
+		eth_phy0: ethernet-phy@0 {
+			max-speed = <100>;
+			reg = <0>;
+		};
+	};
+};
+
+/* ------------------------------------------------------------------
+ * Micro-USB
+ * dr_mode = host is a Linux choice; the port also works as a gadget.
+ * otg needs a gadget function loaded.
+ * ------------------------------------------------------------------ */
+&usb {
+	status = "okay";
+	dr_mode = "host";
+	vbus-supply = <&usb_pwr>;
+};
+
+/* uart_A TX is GPIOX_8, already used by ethernet */
+&uart_A {
+	status = "disabled";
+};
+
+/* ------------------------------------------------------------------
+ * Radios
+ *
+ *   ttyAML0  uart_AO    console   uart_ao_a
+ *   ttyAML1  uart_B     Zigbee    uart_b on GPIOZ
+ *   ttyAML2  uart_AO_B  Z-Wave    uart_ao_b_z on GPIOZ
+ *
+ * Do not use uart_ao_b_pins (AO bank). Z-Wave is uart_ao_b_z.
+ * Do not claim RTS/CTS: a floating CTS stalls TX, and GPIOZ_0 is
+ * the Zigbee reset, not UART RTS.
+ *
+ * reset-gpios: assert = in reset, deassert = run
+ * Zigbee GPIOZ_0 is live when the line is low.
+ * Z-Wave GPIOZ_4 is RESETN (active-low).
+ * GPIOZ_1 and GPIOZ_6/7 are unused.
+ * ------------------------------------------------------------------ */
+
+&gpio {
+	gpio-line-names = "zigbee-reset", "", "", "", "zwave-reset";
+};
+
+/* Zigbee EM3581: TX/RX on GPIOZ_2/3 */
+&uart_B {
+	status = "okay";
+	pinctrl-0 = <&uart_b_z_pins>;
+	pinctrl-names = "default";
+
+	mcu {
+		compatible = "hubitat,em3581";
+		reset-gpios = <&gpio GPIOZ_0 GPIO_ACTIVE_HIGH>;
+	};
+};
+
+/* Z-Wave ZGM130S: TX/RX on GPIOZ_8/9 */
+&uart_AO_B {
+	status = "okay";
+	pinctrl-0 = <&uart_ao_b_z_pins>;
+	pinctrl-names = "default";
+
+	mcu {
+		compatible = "hubitat,zgm130s";
+		reset-gpios = <&gpio GPIOZ_4 GPIO_ACTIVE_LOW>;
+	};
+};
+
+/* ------------------------------------------------------------------
+ * Left disabled:
+ *   sd_emmc_a/b  -- no SD slot, no SDIO wifi
+ *   uart_A       -- GPIOX_8 is ethernet
+ *   i2c / spicc  -- not used on this board
+ * ------------------------------------------------------------------ */
