@@ -11,6 +11,7 @@
 
 enum meson_gx_mmc_compatible {
 	MMC_COMPATIBLE_GX,
+	MMC_COMPATIBLE_AXG,
 	MMC_COMPATIBLE_SM1,
 };
 
@@ -34,6 +35,12 @@ enum meson_gx_mmc_compatible {
 #define   CLK_TX_PHASE_180		(2 << 10)
 #define   CLK_TX_PHASE_270		(3 << 10)
 #define   CLK_ALWAYS_ON			BIT(24)
+
+/* AXG resampling register. GX uses a different adjust block at 0x8. */
+#define MESON_SD_EMMC_V3_ADJUST		0x0c
+#define   ADJUST_ADJ_DELAY_MASK		GENMASK(21, 16)
+#define   ADJUST_ADJ_DELAY_SHIFT	16
+#define   ADJUST_ADJ_EN			BIT(13)
 
 #define MESON_SD_EMMC_CFG		0x44
 #define   CFG_BUS_WIDTH_MASK		GENMASK(1, 0)

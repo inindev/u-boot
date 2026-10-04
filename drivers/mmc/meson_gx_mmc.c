@@ -305,9 +305,58 @@ struct mmc *meson_mmc_init(int mmc_no)
 }
 
 #else /* DM-based driver for use in U-Boot proper */
+#if CONFIG_IS_ENABLED(MMC_SUPPORTS_TUNING)
+/*
+ * AXG HS200 sampling delay. Linux programs this on SD_EMMC_V3_ADJUST.
+ * The number of steps is the ratio of the mux clock to the bus clock.
+ */
+static int meson_mmc_execute_tuning(struct udevice *dev, uint opcode)
+{
+	struct mmc *mmc = mmc_get_mmc_dev(dev);
+	unsigned int src, max_dly, i;
+	u32 val;
+	int ret;
+
+	if (!meson_gx_mmc_is_compatible(dev, MMC_COMPATIBLE_AXG))
+		return -ENOTSUPP;
+
+	if (!mmc->clock)
+		return -EINVAL;
+
+	if (mmc->clock > 16000000)
+		src = SD_EMMC_CLKSRC_DIV2;
+	else
+		src = SD_EMMC_CLKSRC_24M;
+
+	max_dly = DIV_ROUND_UP(src, mmc->clock);
+	if (!max_dly || max_dly > CLK_MAX_DIV)
+		return -EINVAL;
+
+	val = meson_read(mmc, MESON_SD_EMMC_V3_ADJUST);
+	val |= ADJUST_ADJ_EN;
+
+	for (i = 0; i < max_dly; i++) {
+		val &= ~ADJUST_ADJ_DELAY_MASK;
+		val |= (i << ADJUST_ADJ_DELAY_SHIFT) & ADJUST_ADJ_DELAY_MASK;
+		meson_write(mmc, val, MESON_SD_EMMC_V3_ADJUST);
+
+		ret = mmc_send_tuning(mmc, opcode);
+		if (!ret)
+			return 0;
+	}
+
+	val &= ~(ADJUST_ADJ_EN | ADJUST_ADJ_DELAY_MASK);
+	meson_write(mmc, val, MESON_SD_EMMC_V3_ADJUST);
+	return -EIO;
+}
+#endif
+
 static const struct dm_mmc_ops meson_dm_mmc_ops = {
 	.send_cmd = meson_dm_mmc_send_cmd,
 	.set_ios = meson_dm_mmc_set_ios,
+#if CONFIG_IS_ENABLED(MMC_SUPPORTS_TUNING)
+	.execute_tuning = meson_mmc_execute_tuning,
+#endif
 };
 
 static int meson_mmc_of_to_plat(struct udevice *dev)
@@ -348,12 +397,18 @@ static int meson_mmc_probe(struct udevice *dev)
 	cfg->host_caps = MMC_MODE_8BIT | MMC_MODE_4BIT |
 			MMC_MODE_HS_52MHz | MMC_MODE_HS;
 	cfg->f_min = DIV_ROUND_UP(SD_EMMC_CLKSRC_24M, CLK_MAX_DIV);
-	cfg->f_max = 40000000; /* 40 MHz */
+	cfg->f_max = 40000000; /* 40 MHz, raised by max-frequency in DT */
 	cfg->b_max = 511; /* max 512 - 1 blocks */
 	cfg->name = dev->name;
 
+	ret = mmc_of_parse(dev, cfg);
+	if (ret)
+		return ret;
+
 	if (IS_ENABLED(CONFIG_SPL_BUILD)) {
-		cfg->host_caps &= ~(MMC_MODE_HS_52MHz | MMC_MODE_HS);
+		cfg->host_caps &= ~(MMC_MODE_HS_52MHz | MMC_MODE_HS |
+				     MMC_MODE_DDR_52MHz | MMC_MODE_HS200 |
+				     MMC_MODE_HS400 | MMC_MODE_HS400_ES);
 		cfg->f_max = 6000000; /* 6 MHz */
 		cfg->b_max = 127; /* max 128 - 1 block */
 	}
@@ -397,7 +452,7 @@ int meson_mmc_bind(struct udevice *dev)
 
 static const struct udevice_id meson_mmc_match[] = {
 	{ .compatible = "amlogic,meson-gx-mmc", .data = MMC_COMPATIBLE_GX },
-	{ .compatible = "amlogic,meson-axg-mmc", .data = MMC_COMPATIBLE_GX },
+	{ .compatible = "amlogic,meson-axg-mmc", .data = MMC_COMPATIBLE_AXG },
 	{ .compatible = "amlogic,meson-sm1-mmc", .data = MMC_COMPATIBLE_SM1 },
 	{ /* sentinel */ }
 };
